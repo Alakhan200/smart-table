@@ -1,32 +1,15 @@
-import { sortCollection, sortMap } from "../lib/sort.js";
+import { rules, createComparison } from "../lib/compare.js";
 
-export function initSorting(columns) {
+
+export function initSearching(searchField) {
+    // @todo: #5.1 — настроить компаратор
+    const compare = createComparison(
+        ['skipEmptyTargetValues'],
+        [rules.searchMultipleFields(searchField, ['date', 'customer', 'seller'], false)]
+    );
+
     return (data, state, action) => {
-        let field = null;
-        let order = null;
-
-        if (action && action.name === 'sort') {
-            // @todo: #3.1 — запомнить выбранный режим сортировки
-            field = action.dataset.field;
-            order = sortMap[action.dataset.value];
-            action.dataset.value = order;
-
-            // @todo: #3.2 — сбросить сортировки остальных колонок
-            columns.forEach(column => {
-                if (column.dataset.field !== field) {
-                    column.dataset.value = 'none';
-                }
-            });
-        } else {
-            // @todo: #3.3 — получить выбранный режим сортировки
-            columns.forEach(column => {
-                if (column.dataset.value !== 'none') {
-                    field = column.dataset.field;
-                    order = column.dataset.value;
-                }
-            });
-        }
-
-        return sortCollection(data, field, order);
+        // @todo: #5.2 — применить компаратор
+        return data.filter(row => compare(row, state));
     }
 }
